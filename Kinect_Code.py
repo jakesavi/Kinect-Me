@@ -1,13 +1,15 @@
 import os
 import sys
+import json
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 from uarm.wrapper import SwiftAPI
+
 
 """
 uArm code for movement
 moves based on the movement of the kinect, it doesn't let the user move past the allowed limit
+Authors: Rony Tsirkel, Jake Savitt
 """
-
 
 swift = SwiftAPI(filters={'hwid': 'USB VID:PID=2341:0042'}, cmd_pend_size=2, callback_thread_pool_size=1)
 
@@ -42,11 +44,29 @@ z_min = 83
 # base start
 swift.reset()
 swift.get_position(wait=False, callback=lambda i: print('pos', i))
+# give x,y,z base position to keep them in loop
+x_pos = 195.62
+y_pos = 3.07
+z_pos = 148.39
 
 while swift.connected:
-    x_pos = 195.62
-    y_pos = 3.07
-    z_pos = 148.39
+    with open('data.json') as json_file:
+        input = json.load(json_file)
+
+    if os.path.exists(input):
+        hand = False
+    else:
+        hand  = True
+        x_pos = input[x] * 0.118
+        y_pos = input[y] * 0.138
+        z_pos = input[z] * 0.07
+    os.remove('data.json')
+
+    # x_pos = 195.62
+    # y_pos = 3.07
+    # z_pos = 148.39
+    # hand = True
+
     if x_pos > x_max:
         x_pos = x_max
     elif x_pos < x_min:
@@ -62,7 +82,9 @@ while swift.connected:
     # move based on hand
     swift.set_position(x=x_pos, y=y_pos, z=z_pos, speed=speed)
     swift.get_position(wait=False, callback=lambda i: print('pos', i))
-"""
+
+    swift.set_pump(on=hand, timeout = 1)
+    """
     # TOP
     # Position 1
     swift.set_position(x=285.21, y=115.64, z=156.13, speed=speed)
