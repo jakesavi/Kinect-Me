@@ -57,9 +57,9 @@ while swift.connected:
         hand = False
     else:
         hand  = True
-        x_pos = input[x]
-        y_pos = input[y]
-        z_pos = input[z]
+        x_pos = input[x] * 0.118
+        y_pos = input[y] * 0.138
+        z_pos = input[z] * 0.07
     os.remove('data.json')
 
     # x_pos = 195.62
